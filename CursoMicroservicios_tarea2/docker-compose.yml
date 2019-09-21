@@ -27,8 +27,6 @@ services:
     build: ./springboot2-jpa-crud-example
     expose:      
       - "8080"
-    ports:
-      - "8080:8080"
     depends_on:
       - db
     networks: 
@@ -61,18 +59,28 @@ services:
     networks:
       - front-net
 
+  loadbalancer:
+      build: ./load-balancer
+      links:
+        - backend
+      ports:
+        - '9090:9090'
+        - '9191:9191'
+      networks:
+        - front-net
 
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - backend 
-    ports:
-      - "8181:8181"
-      - "4141:4141"
-    networks:
-      - front-net
+  # nginx:
+  #   image: nginx:latest
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - backend 
+  #   expose:
+  #     - "4000"
+  #   ports:
+  #     - "4000:4000"
+  #   networks:
+  #     - front-net
     
 # Names our volume
 volumes:
