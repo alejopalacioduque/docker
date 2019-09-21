@@ -63,24 +63,16 @@ services:
       build: ./load-balancer
       links:
         - backend
+      # volumes:
+        # - ./nginx.conf:/etc/nginx/nginx.conf
+        # - ./cert/taller2.crt:/etc/nginx/taller2.crt
+        # - ./cert/taller2.key:/etc/nginx/taller2.key
       ports:
         - '9090:9090'
-        - '9191:9191'
+        # - '443:443'
+        # - '80:80'
       networks:
         - front-net
-
-  # nginx:
-  #   image: nginx:latest
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #   depends_on:
-  #     - backend 
-  #   expose:
-  #     - "4000"
-  #   ports:
-  #     - "4000:4000"
-  #   networks:
-  #     - front-net
     
 # Names our volume
 volumes:
