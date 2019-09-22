@@ -1,43 +1,58 @@
+# Docker Compose version
 version: '3.3'
 
+# Definition and configuration to services
 services:
+
+  # Database Service
   db:
+    # Image Mysql
     image: mysql:5.7
+    # Configure network
     networks: 
       - back-net
+    # Environment variables to Dabatase service
     environment:
       # Password for root access
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      #Database Name
       MYSQL_DATABASE: users_database
-      # So you don't have to use root, but you can if you like
+      # Mysql user
       MYSQL_USER: ${MYSQL_USER}
-      # You can use whatever password you like
+      # Mysql pass 
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      
+    # Ports to access Mysql Database  
     ports:
       - "3306:3306"
     expose:
       # Opens port 3306 on the container
       - "3306"
-      # Where our data will be persisted
+    # Volume to persist Mysql data
     volumes:
       - my-db:/var/lib/mysql
-
+  
+  # Backend Service
   backend:
+    # Build Dockerfile to Backend service
     build: ./springboot2-jpa-crud-example
+    # Expose port to backend service
     expose:      
       - "8080"
+    # Depends of the Database Service
     depends_on:
       - db
+    # Configure Networks 
     networks: 
       - back-net
       - front-net
+    # Environment variables to backend service
     environment:
       - DATABASE_HOST=db
       - DATABASE_USER=${MYSQL_USER}
       - DATABASE_PASSWORD=${MYSQL_PASSWORD}
       - DATABASE_NAME=users_database
       - DATABASE_PORT=3306
+    # Configuration resources to service
     deploy:  
       resources:  
         limits:
@@ -47,38 +62,50 @@ services:
           cpus: '0.25'
           memory: 50M
 
+  # Frontend Service
   frontend:
+    # Build Dockerfile to Frontend service
     build: ./angular8-springboot-client
+    # Expose port to frontend service
     expose:      
       - "4200"
-    ports:
-      - "4200:4200"
+    # Depends of the Backend and Database Services
     depends_on:
       - db
       - backend
+      # Configure Networks 
     networks:
       - front-net
 
+  # LoadBalancer Service
   loadbalancer:
-      build: ./load-balancer
-      links:
-        - backend
-      # volumes:
-      #   - ./nginx.conf:/etc/nginx/nginx.conf
-        # - ./cert/taller2.crt:/etc/nginx/taller2.crt
-        # - ./cert/taller2.key:/etc/nginx/taller2.key
-      ports:
-        - '9090:9090'
-        # - '9191:9191'
-        - '443:443'
-        - '80:80'
-      networks:
-        - front-net
+    # Build Dockerfile to LoadBalancer service
+    build: ./load-balancer
+    # Depends of the Backend and Frontend Services
+    depends_on:
+      - backend
+      - frontend
+    # Volume to persist nginx data
+    volumes:
+      - load-balancer:/etc/nginx
+    # Expose port to backend service
+    expose:      
+      - "9090"
+    # Ports to configure nginx
+    ports:
+      - '9090:9090' # port to backend service
+      - '443:443' # port to front end service with ssl
+      - '80:80' # port to front end service
+    # Configure network
+    networks:
+      - front-net
     
-# Names our volume
+# Volumes to persit data
 volumes:
   my-db:
+  load-balancer:
 
+# Networks to services
 networks: 
   back-net:
   front-net:

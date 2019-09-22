@@ -1,11 +1,10 @@
-# Use the standard Nginx image from Docker Hub
 FROM nginx:latest
-# Copy the configuration file from the current directory and paste 
-# it inside the container to use it as Nginx's default config.
+# Copy the config file
 COPY nginx.conf /etc/nginx/nginx.conf
+# Copy the crt file
 COPY ./cert/localhost.crt /etc/nginx/localhost.crt
+# Copy the key file
 COPY ./cert/localhost.key /etc/nginx/localhost.key
-EXPOSE 9090
 
 # Start Nginx when the container has provisioned.
 CMD ["nginx", "-g", "daemon off;"]
