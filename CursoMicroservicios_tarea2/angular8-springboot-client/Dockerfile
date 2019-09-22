@@ -19,5 +19,5 @@ RUN npm install && npm install -g @angular/cli && npm cache verify
 # add app
 COPY . /app
 # start app
-CMD ng serve --host 0.0.0.0
+CMD ng serve --host 0.0.0.0 --port 4200 --public-host http://localhost:4200
 
